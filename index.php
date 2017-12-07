@@ -59,8 +59,67 @@ TDBConnection::getConnection();
     TDBConnection::execute();
     TDBConnection::endTransaction();
 }
+
+precisarei de três variáveis:
+
+tipo ->cep
+     ->loc
+busca
+
+metodo
 */
 
 
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
+} // end of if (method = GET)
+
+if ($_SERVER["REQUEST_METHOD"] == "GET") {
+
+    # variavel tipo, precisa ser cep ou loc
+    $_GET['tipo'] = trim($_GET['tipo']);
+    if (isset($_GET['tipo']) && !empty($_GET['tipo'])) {
+        $tipo = strip_tags($_GET['tipo']);
+
+    } else {
+        $erro["tipo"] = "[erro: Tipo de busca não definida]";
+    }
+
+    # variavel tipo, precisa ser cep ou loc
+    $_GET['busca'] = trim($_GET['busca']);
+    if (isset($_GET['busca']) && !empty($_GET['busca'])) {
+        $busca = strip_tags($_GET['busca']);
+
+    } else {
+        $erro["busca"] = "[erro: Termo de busca vazio]";
+    }
+
+    # variavel tipo, precisa ser cep ou loc
+    $_GET['metodo'] = trim($_GET['metodo']);
+    if (isset($_GET['metodo']) && !empty($_GET['metodo'])) {
+        $metodo = strip_tags($_GET['metodo']);
+
+    } else {
+        $erro["metodo"] = "[erro: metodo de busca não definida]";
+    }
+
+} // end of if (method = GET)
+
+
+// testes meu amor
+echo "<pre>\n";
+print_r($tipo);
+echo "</pre>\n";
+
+echo "<pre>\n";
+print_r($busca);
+echo "</pre>\n";
+
+echo "<pre>\n";
+print_r($metodo);
+echo "</pre>\n";
+
+echo "<pre>\n";
+print_r($erro);
+echo "</pre>\n";
 
