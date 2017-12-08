@@ -62,11 +62,11 @@ TDBConnection::getConnection();
 
 precisarei de três variáveis:
 
-tipo ->cep
+field ->cep
      ->loc
-busca
+value
 
-metodo
+method
 */
 
 
@@ -76,47 +76,114 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 if ($_SERVER["REQUEST_METHOD"] == "GET") {
 
-    # variavel tipo, precisa ser cep ou loc
-    $_GET['tipo'] = trim($_GET['tipo']);
-    if (isset($_GET['tipo']) && !empty($_GET['tipo'])) {
-        $tipo = strip_tags($_GET['tipo']);
-
+    # variavel value, pode ser o cep ou logradouro
+    $_GET['value'] = trim($_GET['value']);
+    if (isset($_GET['value']) && !empty($_GET['value'])) {
+        $value = strip_tags($_GET['value']);
     } else {
-        $erro["tipo"] = "[erro: Tipo de busca não definida]";
+        $erro["value"] = "[erro: Termo de value vazio]";
     }
 
-    # variavel tipo, precisa ser cep ou loc
-    $_GET['busca'] = trim($_GET['busca']);
-    if (isset($_GET['busca']) && !empty($_GET['busca'])) {
-        $busca = strip_tags($_GET['busca']);
+    # variavel method, pode variar: json, qwerty
+    $_GET['method'] = trim($_GET['method']);
+    if (isset($_GET['method']) && !empty($_GET['method'])) {
+        $method = strip_tags($_GET['method']);
 
     } else {
-        $erro["busca"] = "[erro: Termo de busca vazio]";
+        $erro["method"] = "[erro: method de value não definida]";
     }
 
-    # variavel tipo, precisa ser cep ou loc
-    $_GET['metodo'] = trim($_GET['metodo']);
-    if (isset($_GET['metodo']) && !empty($_GET['metodo'])) {
-        $metodo = strip_tags($_GET['metodo']);
-
+    # variavel debug, deve ser qualquer coisa, nula ou vazia
+    # se tiver algum valor faz o debug ficar true
+    $_GET['debug'] = strip_tags(trim($_GET['debug']));
+    if (isset($_GET['debug']) && !empty($_GET['debug'])) {
+        $debug = true;
     } else {
-        $erro["metodo"] = "[erro: metodo de busca não definida]";
+        $debug = false;
     }
 
+    # variavel field, precisa ser cep ou log de logradouro
+    $_GET['field'] = strip_tags(trim($_GET['field']));
+    if (isset($_GET['field']) && !empty($_GET['field'])) {
+        $field = $_GET['field'];
+        if ( !in_array($field, ['cep', 'log'])){
+            $erro["field"] = "[erro: field de value inválida]";
+        }
+    } else {
+        $erro["field"] = "[erro: field de value não definida]";
+    }
+
+    if ($field == 'cep') {
+
+        $cep = preg_replace("/[^0-9]/", "", $value);
+
+        if (strlen($cep) == 8){
+
+            $cep3 = substr($cep, -3);
+            $cep5 = substr($cep, 0, 5);
+
+          if ($cep3 == "000"){
+                TDBConnection::prepareQuery("SELECT * FROM cep_unico WHERE cep = :cep;");
+                TDBConnection::bindParamQuery(':cep', $cep5 . "-" . $cep3, PDO::PARAM_STR);
+                $cep_unico = TDBConnection::single();
+                if (!empty($cep_unico)) {
+                    $endereco = array(
+                        'cep' => $cep5 . "-" . $cep3,
+                        'cidade' => $cep_unico->Nome,
+                        'logradouro' => '',
+                        'bairro' => '',
+                        'uf' => $cep_unico->UF,
+                        'tipo' => '',
+                    );
+                    $resultado[] = $endereco;
+                } else {
+                    $erro["cep"] = "[erro: cep único não encontrado.]";
+                }
+
+            } else /* logradoures completos */ {
+                // achar o estado
+                TDBConnection::prepareQuery("SELECT uf FROM cep_log_index where cep5 = :cep;");
+                TDBConnection::bindParamQuery(':cep', $cep5, PDO::PARAM_STR);
+                $estadoCEP5 = TDBConnection::single();
+                if (!empty($estadoCEP5)){
+                    TDBConnection::prepareQuery("SELECT * FROM " . $estadoCEP5->uf . " where cep = :cep;");
+                    TDBConnection::bindParamQuery(':cep', $cep5 . "-" . $cep3, PDO::PARAM_STR);
+                    $cep_completo = TDBConnection::single();
+                    $endereco = array(
+                        'cep' => $cep5 . "-" . $cep3,
+                        'cidade' => $cep_completo->cidade,
+                        'logradouro' => $cep_completo->logradouro,
+                        'bairro' => $cep_completo->bairro,
+                        'uf' => $estadoCEP5->uf,
+                        'tipo' => $cep_completo->tp_logradouro,
+                    );
+                    $resultado[] = $endereco;
+                } else {
+                    $erro["cep"] = "[erro: cep não encontrado, uf inválido p\ $cep5.]";
+                }
+            }
+        } else {
+            $erro["cep"] = "[erro: cep inválido, formato inválido]";
+        }
+    } // end of if ($field == 'cep')
 } // end of if (method = GET)
 
 
 // testes meu amor
 echo "<pre>\n";
-print_r($tipo);
+print_r($resultado);
 echo "</pre>\n";
 
 echo "<pre>\n";
-print_r($busca);
+print_r($cep_unico);
 echo "</pre>\n";
 
 echo "<pre>\n";
-print_r($metodo);
+print_r($method);
+echo "</pre>\n";
+
+echo "<pre>\n";
+print_r( $estadoCEP5) ;
 echo "</pre>\n";
 
 echo "<pre>\n";
