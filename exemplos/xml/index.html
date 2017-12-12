@@ -25,6 +25,12 @@
 
                         <br>
 
+                        <?php
+
+
+
+                        ?>
+
                         <form action="#" class="form-horizontal">
 
                             <div class="form-group">
@@ -121,30 +127,47 @@
                             dataType: "xml",
                             success: function(xml) {
 
+                                var naoencontrou = $(xml).find('erro').text();
+
+                                if (!(naoencontrou == "erroerro")) {
+
+                                    var bairro = $(xml).find('bairro').text();
+                                    $("#bairro").val(bairro);
+                                    var cidade = $(xml).find('cidade').text();
+                                    $("#cidade").val(cidade);
+                                    var uf = $(xml).find('uf').text();
+                                    $("#uf").val(uf.toUpperCase());
+                                    var tipo = $(xml).find('tipo').text();
+                                    var logradouro = $(xml).find('logradouro').text();
+                                    $("#logradouro").val(tipo + ' ' + logradouro);
+
+                                } else {
+                                    alert('Cep nãoi encontrado!');
+                                    limpa_formulario_cep();
+                                }
 
 
-                                var erro = $(xml).find('erro').text();
 
 
-                                var cidade = $(xml).find('cidade').text();
-                                var cidade = $(xml).find('cidade').text();
-                                var cidade = $(xml).find('cidade').text();
-                                var cidade = $(xml).find('cidade').text();
-                                var cidade = $(xml).find('cidade').text();
-                                $("#cidade").val(cidade);
-                                $("#bairro").val("...");
-                                $("#cidade").val("...");
-                                $("#uf").val("...");
-
-
-                                console.log(erro);
-
-                                //but if it's multible items then loop
-                                $(xml).find('endereço').each(function(){
-                                    //$("section#saida").append('<p>' + $(this).text() + '</p>');
-
-                                    console.log($(this).text());
-                                });
+                                // var cidade = $(xml).find('cidade').text();
+                                // // var cidade = $(xml).find('cidade').text();
+                                // // var cidade = $(xml).find('cidade').text();
+                                // // var cidade = $(xml).find('cidade').text();
+                                // // var cidade = $(xml).find('cidade').text();
+                                // $("#cidade").val(cidade);
+                                // // $("#bairro").val("...");
+                                // // $("#cidade").val("...");
+                                // // $("#uf").val("...");
+                                //
+                                //
+                                // console.log("erro:" + erro);
+                                //
+                                // //but if it's multible items then loop
+                                // $(xml).find('endereço').each(function(){
+                                //     //$("section#saida").append('<p>' + $(this).text() + '</p>');
+                                //
+                                //     console.log($(this).text());
+                                //});
                             }
 
                         });
