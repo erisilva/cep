@@ -115,7 +115,39 @@
                         $("#cidade").val("...");
                         $("#uf").val("...");
 
+                        $.ajax({
+                            type: "GET",
+                            url: "http://localhost/cep/?value=" + cep + "&field=cep&method=xml",
+                            dataType: "xml",
+                            success: function(xml) {
 
+
+
+                                var erro = $(xml).find('erro').text();
+
+
+                                var cidade = $(xml).find('cidade').text();
+                                var cidade = $(xml).find('cidade').text();
+                                var cidade = $(xml).find('cidade').text();
+                                var cidade = $(xml).find('cidade').text();
+                                var cidade = $(xml).find('cidade').text();
+                                $("#cidade").val(cidade);
+                                $("#bairro").val("...");
+                                $("#cidade").val("...");
+                                $("#uf").val("...");
+
+
+                                console.log(erro);
+
+                                //but if it's multible items then loop
+                                $(xml).find('endereço').each(function(){
+                                    //$("section#saida").append('<p>' + $(this).text() + '</p>');
+
+                                    console.log($(this).text());
+                                });
+                            }
+
+                        });
 
 
 
@@ -130,25 +162,7 @@
 
 
             
-            $.ajax({
-                type: "GET",
-                url: "http://localhost/cep/?value=32223130&field=cep&method=xml",
-                dataType: "xml",
-                success: function(xml) {
 
-                    var cidade = $(xml).find('cidade').text();
-
-                    console.log(cidade);
-
-                    //but if it's multible items then loop
-                    $(xml).find('endereço').each(function(){
-                        //$("section#saida").append('<p>' + $(this).text() + '</p>');
-
-                        console.log($(this).text());
-                    });
-                }
-
-            });
 
 
         });
