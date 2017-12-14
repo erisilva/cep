@@ -76,7 +76,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
     if (isset($_GET['value']) && !empty($_GET['value'])) {
         $value = strip_tags($_GET['value']);
     } else {
-        $erro["value"] = "erro: Termo de value vazio]";
+        $erro["value"] = "Parâmetro incorreto. Campo value precisa ter um valor.";
     }
 
     # variavel method, pode variar: json, qwerty
@@ -85,7 +85,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
         $method = strip_tags($_GET['method']);
 
     } else {
-        $erro["method"] = "erro: method de value não definida]";
+        $erro["method"] = "Parâmetro incorreto. Campo method precisa ter um valor.";
     }
 
     # variavel debug, deve ser qualquer coisa, nula ou vazia
@@ -102,10 +102,10 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
     if (isset($_GET['field']) && !empty($_GET['field'])) {
         $field = $_GET['field'];
         if ( !in_array($field, ['cep', 'log'])){
-            $erro["field"] = "erro: field de value inválida]";
+            $erro["field"] = "field de value inválida";
         }
     } else {
-        $erro["field"] = "erro: field de value não definida]";
+        $erro["field"] = "Parâmetro incorreto. Campo field precisa ter um valor.";
     }
 
     // consulta por cep
@@ -130,7 +130,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
                     );
                     $resultado[] = $endereco;
                 } else {
-                    $erro["cep"] = "erro: cep único não encontrado.";
+                    $erro["cep"] = "cep (único) não encontrado.";
                 }
             } else /* logradoures completos */ {
                 // achar o estado
@@ -151,61 +151,85 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
                     );
                     $resultado[] = $endereco;
                 } else {
-                    $erro["cep"] = "erro: cep não encontrado, uf inválido p\ $cep5.";
+                    $erro["cep"] = "cep não encontrado, uf inválido p\ $cep5.";
                 }
             }
         } else {
-            $erro["cep"] = "erro: cep inválido, formato inválido";
+            $erro["cep"] = "cep inválido, formato inválido";
         }
-    } // end of if ($field == 'cep')
 
+        if ($method == 'xml'){
 
+            $xml = new SimpleXMLElement("<?xml version=\"1.0\" encoding=\"utf-8\" ?><consulta_cep></consulta_cep>");
 
-    if ($method == 'xml'){
-
-        $xml = new SimpleXMLElement("<?xml version=\"1.0\" encoding=\"utf-8\" ?><consulta_cep></consulta_cep>");
-
-        if (!isset($erro)) {
-            foreach ($resultado as $resultadoItem){
-                $enderecoChild = $xml->addChild('endereco');
-                $enderecoChild->addChild('cep', $resultadoItem["cep"]);
-                $enderecoChild->addChild('cidade', $resultadoItem["cidade"]);
-                $enderecoChild->addChild('logradouro', $resultadoItem["logradouro"]);
-                $enderecoChild->addChild('bairro', $resultadoItem["bairro"]);
-                $enderecoChild->addChild('uf', $resultadoItem["uf"]);
-                $enderecoChild->addChild('tipo', $resultadoItem["tipo"]);
-            }
-            Header('Content-type: text/xml');
-            print($xml->asXML());
-        } else { // end of !isset($erro)
-
-            if ($debug) {
-                foreach ($erro as $erroItem => $erroItemNome) {
-                    $erroChild = $xml->addChild('erro');
-                    $erroChild->addChild($erroItem, $erroItemNome);
+            if (!isset($erro)) {
+                foreach ($resultado as $resultadoItem){
+                    $enderecoChild = $xml->addChild('endereco');
+                    $enderecoChild->addChild('cep', $resultadoItem["cep"]);
+                    $enderecoChild->addChild('cidade', $resultadoItem["cidade"]);
+                    $enderecoChild->addChild('logradouro', $resultadoItem["logradouro"]);
+                    $enderecoChild->addChild('bairro', $resultadoItem["bairro"]);
+                    $enderecoChild->addChild('uf', $resultadoItem["uf"]);
+                    $enderecoChild->addChild('tipo', $resultadoItem["tipo"]);
                 }
                 Header('Content-type: text/xml');
                 print($xml->asXML());
+            } else { // end of !isset($erro)
+
+                if ($debug) {
+                    foreach ($erro as $erroItem => $erroItemNome) {
+                        $erroChild = $xml->addChild('erro');
+                        $erroChild->addChild($erroItem, $erroItemNome);
+                    }
+                    Header('Content-type: text/xml');
+                    print($xml->asXML());
+                } else {
+                    $erroChild = $xml->addChild('erro');
+                    $erroChild->addChild('erro', 'erro');
+                    Header('Content-type: text/xml');
+                    print($xml->asXML());
+                }
+            } // end of !isset($erro)
+        } // end of $method == 'xml'
+
+
+        if ($method == 'json'){
+            if (!isset($erro)) {
+                $myJSON = json_encode($resultado, JSON_UNESCAPED_UNICODE);
+                header("Content-type: application/json; charset=utf-8");
+                print($myJSON);
             } else {
-                $erroChild = $xml->addChild('erro');
-                $erroChild->addChild('erro', 'erro');
-                Header('Content-type: text/xml');
-                print($xml->asXML());
-            }
 
-        }
+                if ($debug) {
+                    $myJSON = json_encode($erro, JSON_UNESCAPED_UNICODE);
+                    header("Content-type: application/json; charset=utf-8");
+                    print($myJSON);
+                } else {
+                    $myJSON = json_encode(['erro' => 'erro']);
+                    header("Content-type: application/json; charset=utf-8");
+                    print($myJSON);
+                }
 
-    } // end of $method == 'xml'
+            } // end of !isset($erro)
+        } // end of $method == 'json'
+    } // end of if ($field == 'cep')
 
+
+    function utf8_encode_all($dat) // -- It returns $dat encoded to UTF8
+    {
+        if (is_string($dat)) return utf8_encode($dat);
+        if (!is_array($dat)) return $dat;
+        $ret = array();
+        foreach($dat as $i=>$d) $ret[$i] = utf8_encode_all($d);
+        return $ret;
+    }
 
 
 } // end of if (method = GET)
 
 
 // testes meu amor
-//echo "<pre>\n";
-//print_r($resultado);
-//echo "</pre>\n";
+
 //
 //echo "<pre>\n";
 //print_r($erro);
