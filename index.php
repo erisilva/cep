@@ -12,7 +12,6 @@ $loader = new Autoloader();
 $loader->directories = array('libs');
 $loader->register();
 
-
 /*
  * header page
  */
@@ -26,43 +25,6 @@ ini_set('error_reporting', E_ALL ^ E_NOTICE);
  * se conecta
  */
 TDBConnection::getConnection();
-
-/*
- * segurança
- * para toda requisição é feita a criação de um token aleatorio
- * se não existir nenhum token de sessao ao se solicitar
- * a pagina é criado um token
- */
-/*if (!isset($_SESSION['token'])){
-    date_default_timezone_set('America/Sao_Paulo');
-    $token = md5(uniqid(rand(), TRUE));
-    $quando = date("Y-m-d H:i:s");
-    $_SESSION['token'] = $token;
-    $_SESSION['token_time'] = time();
-
-    /* captura o e-mail da origem da requisição dessa página */
-    //$ip = gethostbyaddr($_SERVER['REMOTE_ADDR']);
-
-    /* Grava o logacesso com o ip origem da requisição, juntamente com token com a data/hora */
-    /* ERRO MEU: eu chamei o campo de data/hora de description em vez de quando como uso. Vou arrumar algum dia.*/
-/*
-    TDBConnection::beginTransaction();
-    TDBConnection::prepareQuery("INSERT INTO logacesso VALUES (null, :token, :ip, :description);");
-    TDBConnection::bindParamQuery(':token', $token, PDO::PARAM_STR);
-    TDBConnection::bindParamQuery(':ip', $ip, PDO::PARAM_STR);
-    TDBConnection::bindParamQuery(':description', $quando, PDO::PARAM_STR);
-    TDBConnection::execute();
-    TDBConnection::endTransaction();
-}
-
-precisarei de três variáveis:
-
-field ->cep
-     ->loc
-value
-
-method
-*/
 
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -114,7 +76,6 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
         if (strlen($cep) == 8){
             $cep3 = substr($cep, -3);
             $cep5 = substr($cep, 0, 5);
-
           if ($cep3 == "000"){
                 TDBConnection::prepareQuery("SELECT * FROM cep_unico WHERE cep = :cep;");
                 TDBConnection::bindParamQuery(':cep', $cep5 . "-" . $cep3, PDO::PARAM_STR);
@@ -132,7 +93,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
                 } else {
                     $erro["cep"] = "cep (único) não encontrado.";
                 }
-            } else /* logradoures completos */ {
+            } else { /* logradoures completos */
                 // achar o estado
                 TDBConnection::prepareQuery("SELECT uf FROM cep_log_index where cep5 = :cep;");
                 TDBConnection::bindParamQuery(':cep', $cep5, PDO::PARAM_STR);
@@ -159,9 +120,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
         }
 
         if ($method == 'xml'){
-
             $xml = new SimpleXMLElement("<?xml version=\"1.0\" encoding=\"utf-8\" ?><consulta_cep></consulta_cep>");
-
             if (!isset($erro)) {
                 foreach ($resultado as $resultadoItem){
                     $enderecoChild = $xml->addChild('endereco');
@@ -175,7 +134,6 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
                 Header('Content-type: text/xml');
                 print($xml->asXML());
             } else { // end of !isset($erro)
-
                 if ($debug) {
                     foreach ($erro as $erroItem => $erroItemNome) {
                         $erroChild = $xml->addChild('erro');
@@ -192,14 +150,12 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
             } // end of !isset($erro)
         } // end of $method == 'xml'
 
-
         if ($method == 'json'){
             if (!isset($erro)) {
                 $myJSON = json_encode($resultado, JSON_UNESCAPED_UNICODE);
                 header("Content-type: application/json; charset=utf-8");
                 print($myJSON);
             } else {
-
                 if ($debug) {
                     $myJSON = json_encode($erro, JSON_UNESCAPED_UNICODE);
                     header("Content-type: application/json; charset=utf-8");
@@ -209,20 +165,10 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
                     header("Content-type: application/json; charset=utf-8");
                     print($myJSON);
                 }
-
             } // end of !isset($erro)
         } // end of $method == 'json'
     } // end of if ($field == 'cep')
 
-
-    function utf8_encode_all($dat) // -- It returns $dat encoded to UTF8
-    {
-        if (is_string($dat)) return utf8_encode($dat);
-        if (!is_array($dat)) return $dat;
-        $ret = array();
-        foreach($dat as $i=>$d) $ret[$i] = utf8_encode_all($d);
-        return $ret;
-    }
 
 
 } // end of if (method = GET)

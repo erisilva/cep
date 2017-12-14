@@ -29,7 +29,7 @@
                         if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             $cep = (isset($_POST['cep']) ? strip_tags(trim($_POST['cep'])) : '');
 
-                            //$link = "http://localhost/cep/?value=" . $cep . "&field=cep&method=xml";
+                            //para não listar o erro use: $link = "http://localhost/cep/?value=" . $cep . "&field=cep&method=xml";
 
                             // listando os erros
                             $link = "http://localhost/cep/?value=" . $cep . "&field=cep&method=xml&debug=1";
@@ -44,8 +44,9 @@
 
                             if (!$xml->erro->cep) {
                                 echo "Cidade: " . $xml->endereco->cidade . "<br>";
+                                echo "Estado: " . $xml->endereco->uf . "<br>";
                             } else {
-                                echo $xml->erro->cep . "<br>";
+                                echo "Erro encontrado: " . $xml->erro->cep . "<br>";
                             }
 
                             echo "</pre>\n";
