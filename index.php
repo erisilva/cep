@@ -167,7 +167,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
 
         if (!isset($erro)) {
             foreach ($resultado as $resultadoItem){
-                $enderecoChild = $xml->addChild('endereço');
+                $enderecoChild = $xml->addChild('endereco');
                 $enderecoChild->addChild('cep', $resultadoItem["cep"]);
                 $enderecoChild->addChild('cidade', $resultadoItem["cidade"]);
                 $enderecoChild->addChild('logradouro', $resultadoItem["logradouro"]);

@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8">
 	<meta name="author" content="Eri Silva - www.erisilva.net">
-    <meta name="description" content="">
+    <meta name="description" content="webservice cep, consulta cep, xml exemplo">
     <meta name="keywords" content="">
     <meta name="robots" content="noindex, nofollow">
 	<link rel="icon" href="../img/favicon.png">
@@ -26,12 +26,37 @@
                         <br>
 
                         <?php
+                        if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                            $cep = (isset($_POST['cep']) ? strip_tags(trim($_POST['cep'])) : '');
 
+                            //$link = "http://localhost/cep/?value=" . $cep . "&field=cep&method=xml";
+
+                            // listando os erros
+                            $link = "http://localhost/cep/?value=" . $cep . "&field=cep&method=xml&debug=1";
+
+                            $xml = simplexml_load_file($link);
+
+                            echo "<pre>\n";
+                            print_r($xml);
+                            echo "</pre>\n";
+
+                            echo "<pre>\n";
+
+                            if (!$xml->erro->cep) {
+                                echo "Cidade: " . $xml->endereco->cidade . "<br>";
+                            } else {
+                                echo $xml->erro->cep . "<br>";
+                            }
+
+                            echo "</pre>\n";
+
+                        }
 
 
                         ?>
 
-                        <form action="#" class="form-horizontal">
+                        <form class="form-horizontal"  method="post"
+                              action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
 
                             <div class="form-group">
                                 <label class="col-md-3 control-label" for="cep">CEP:</label>
@@ -109,7 +134,6 @@
                 var cep = $(this).val().replace(/\D/g, '');
 
 
-
                 if (cep != "") {
 
                     var validacep = /^[0-9]{8}$/;
@@ -142,38 +166,13 @@
                                     $("#logradouro").val(tipo + ' ' + logradouro);
 
                                 } else {
-                                    alert('Cep nãoi encontrado!');
+                                    //alert('Cep nãoi encontrado!');
                                     limpa_formulario_cep();
                                 }
 
-
-
-
-                                // var cidade = $(xml).find('cidade').text();
-                                // // var cidade = $(xml).find('cidade').text();
-                                // // var cidade = $(xml).find('cidade').text();
-                                // // var cidade = $(xml).find('cidade').text();
-                                // // var cidade = $(xml).find('cidade').text();
-                                // $("#cidade").val(cidade);
-                                // // $("#bairro").val("...");
-                                // // $("#cidade").val("...");
-                                // // $("#uf").val("...");
-                                //
-                                //
-                                // console.log("erro:" + erro);
-                                //
-                                // //but if it's multible items then loop
-                                // $(xml).find('endereço').each(function(){
-                                //     //$("section#saida").append('<p>' + $(this).text() + '</p>');
-                                //
-                                //     console.log($(this).text());
-                                //});
                             }
 
                         });
-
-
-
 
                     } else {
                         limpa_formulario_cep();
