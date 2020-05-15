@@ -29,10 +29,7 @@
                         if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             $cep = (isset($_POST['cep']) ? strip_tags(trim($_POST['cep'])) : '');
 
-                            //para não listar o erro use: $link = "http://localhost/cep/?value=" . $cep . "&field=cep&method=xml";
-
-                            // listando os erros
-                            $link = "http://localhost/cep/?value=" . $cep . "&field=cep&method=xml&debug=1";
+                            $link = "http://localhost/cep/?value=" . $cep . "&method=xml";
 
                             $xml = simplexml_load_file($link);
 
@@ -42,11 +39,13 @@
 
                             echo "<pre>\n";
 
-                            if (!$xml->erro->cep) {
+                            if (!$xml->erro) {
                                 echo "Cidade: " . $xml->endereco->cidade . "<br>";
+                                echo "Bairro: " . $xml->endereco->bairro . "<br>";
                                 echo "Estado: " . $xml->endereco->uf . "<br>";
+                                echo "Endereço: " . $xml->endereco->rua . "<br>";
                             } else {
-                                echo "Erro encontrado: " . $xml->erro->cep . "<br>";
+                                echo "Erro encontrado<br>";
                             }
 
                             echo "</pre>\n";
@@ -148,7 +147,7 @@
 
                         $.ajax({
                             type: "GET",
-                            url: "http://localhost/cep/?value=" + cep + "&field=cep&method=xml",
+                            url: "http://localhost/cep/?value=" + cep + "&method=xml",
                             dataType: "xml",
                             success: function(xml) {
 
@@ -162,8 +161,7 @@
                                     $("#cidade").val(cidade);
                                     var uf = $(xml).find('uf').text();
                                     $("#uf").val(uf.toUpperCase());
-                                    var tipo = $(xml).find('tipo').text();
-                                    var logradouro = $(xml).find('logradouro').text();
+                                    var logradouro = $(xml).find('rua').text();
                                     $("#logradouro").val(tipo + ' ' + logradouro);
 
                                 } else {

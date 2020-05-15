@@ -29,7 +29,7 @@
                         if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             $cep = (isset($_POST['cep']) ? strip_tags(trim($_POST['cep'])) : '');
 
-                            $str = file_get_contents("http://localhost/cep/?value=" . $cep . "&field=cep&method=json");
+                            $str = file_get_contents("http://localhost/cep/?value=" . $cep . "&method=json");
                             $json = json_decode($str, true);
 
                             echo "<pre>\n";
@@ -37,7 +37,19 @@
                             echo "</pre>\n";
 
                             echo "<pre>\n";
+                            echo "Rua:" . $json[0]['rua'];
+                            echo "</pre>\n";
+
+                            echo "<pre>\n";
                             echo "Cidade:" . $json[0]['cidade'];
+                            echo "</pre>\n";
+
+                            echo "<pre>\n";
+                            echo "Bairro:" . $json[0]['bairro'];
+                            echo "</pre>\n";
+
+                            echo "<pre>\n";
+                            echo "UF:" . $json[0]['uf'];
                             echo "</pre>\n";
 
                         }
@@ -138,7 +150,7 @@
 
                         $.ajax({
                             dataType: "json",
-                            url: "http://localhost/cep/?value=" + cep + "&field=cep&method=json",
+                            url: "http://localhost/cep/?value=" + cep + "&method=json",
                             type: "GET",
                             success: function(json) {
 
@@ -149,9 +161,7 @@
                                     $("#bairro").val(json[0]['bairro']);
                                     $("#cidade").val(json[0]['cidade']);
                                     $("#uf").val(json[0]['uf'].toUpperCase());
-                                    var tipo = json[0]['tipo'];
-                                    var logradouro = json[0]['logradouro'];
-                                    $("#logradouro").val(tipo + ' ' + logradouro);
+                                    $("#logradouro").val(json[0]['rua']);
                                 }
                             }
                         });
